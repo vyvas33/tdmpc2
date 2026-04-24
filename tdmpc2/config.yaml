@@ -2,9 +2,15 @@ defaults:
     - override hydra/launcher: submitit_local
 
 # environment
-task: dog-run
+task: mjlab-Unitree-G1-Tracking
 obs: state
-episodic: false
+episodic: true  # WBT terminates early on falls/anchor drift; required by online_trainer
+
+# mjlab-specific (read by envs/mjlab.py)
+motion_path: data/lafan1_retargeted_npz/g1/walk1_subject1.npz
+device: cuda
+normalize_obs: true
+mjlab_max_episode_steps: 500  # cap; some env_cfgs set episode_length_s=1e9
 
 # evaluation
 checkpoint: ???
@@ -52,7 +58,7 @@ vmin: -10
 vmax: +10
 
 # architecture
-model_size: ???
+model_size: 5
 num_enc_layers: 2
 enc_dim: 256
 num_channels: 32
@@ -64,15 +70,15 @@ dropout: 0.01
 simnorm_dim: 8
 
 # logging
-wandb_project: ???
+wandb_project: unitree-rl-integration
 wandb_entity: ???
 wandb_silent: false
 enable_wandb: true
 save_csv: true
 
 # misc
-compile: true
-save_video: true
+compile: false  # mjlab GPU sim + torch.compile/CUDA-graphs is brittle; flip on once stable
+save_video: false  # mjlab render API doesn't fit TDMPC2's video logger
 save_agent: true
 seed: 1
 
