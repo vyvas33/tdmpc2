@@ -38,7 +38,12 @@ class MjlabSingleEnvWrapper(gym.Env):
 		from rl.sac_env_wrapper import EmpiricalNormalization
 
 		task_id = cfg.task[len(_TASK_PREFIX):]
-		device = torch.device(cfg.get("device", "cuda"))
+		# warp/mjlab require an explicit index ("cuda:0"), not the bare "cuda"
+		# alias that torch accepts.
+		raw_device = str(cfg.get("device", "cuda:0"))
+		if raw_device == "cuda":
+			raw_device = "cuda:0"
+		device = torch.device(raw_device)
 
 		env_cfg = load_env_cfg(task_id)
 
