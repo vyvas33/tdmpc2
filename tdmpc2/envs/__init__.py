@@ -63,7 +63,12 @@ def make_env(cfg):
 	"""
 	Make an environment for TD-MPC2 experiments.
 	"""
-	gym.logger.set_level(40)
+	# gymnasium >=1.0 removed `logger.set_level`; fall back to stdlib logging.
+	if hasattr(gym.logger, 'set_level'):
+		gym.logger.set_level(40)
+	else:
+		import logging
+		logging.getLogger('gymnasium').setLevel(logging.ERROR)
 	if cfg.multitask:
 		env = make_multitask_env(cfg)
 
