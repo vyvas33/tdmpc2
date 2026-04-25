@@ -65,7 +65,11 @@ class MjlabSingleEnvWrapper(gym.Env):
 			if os.path.exists(candidate):
 				motion_path = candidate
 		motion_cmd.motion_file = motion_path
-		motion_cmd.sampling_mode = "uniform"
+		# "uniform" = sample any frame (broader coverage, more 1-step terminations
+		# at single num_envs); "start" = always begin at frame 0 (consistent
+		# init, easier early learning); "adaptive" = curriculum biasing toward
+		# hard segments.
+		motion_cmd.sampling_mode = str(cfg.get("motion_sampling_mode", "uniform"))
 
 		env_cfg.scene.num_envs = 1
 		env_cfg.auto_reset = False

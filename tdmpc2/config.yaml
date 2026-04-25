@@ -11,6 +11,7 @@ motion_path: data/lafan1_retargeted_npz/g1/walk1_subject1.npz
 device: cuda:0  # warp/mjlab require an explicit index, not the bare "cuda" alias
 normalize_obs: true
 mjlab_max_episode_steps: 500  # cap; some env_cfgs set episode_length_s=1e9
+motion_sampling_mode: uniform  # uniform | start | adaptive — see envs/mjlab.py
 
 # evaluation
 checkpoint: ???
