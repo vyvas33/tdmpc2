@@ -74,11 +74,16 @@ def make_env(cfg):
 
 	else:
 		env = None
-		for fn in [make_mjlab_env, make_dm_control_env, make_maniskill_env, make_metaworld_env, make_myosuite_env, make_mujoco_env]:
-			try:
-				env = fn(cfg)
-			except ValueError:
-				pass
+		# Short-circuit for mjlab-* tasks so real init errors aren't swallowed
+		# by the swallow-all-ValueErrors maker loop below.
+		if isinstance(cfg.task, str) and cfg.task.startswith('mjlab-'):
+			env = make_mjlab_env(cfg)
+		else:
+			for fn in [make_dm_control_env, make_maniskill_env, make_metaworld_env, make_myosuite_env, make_mujoco_env]:
+				try:
+					env = fn(cfg)
+				except ValueError:
+					pass
 		if env is None:
 			raise ValueError(f'Failed to make environment "{cfg.task}": please verify that dependencies are installed and that the task exists.')
 		env = TensorWrapper(env)

@@ -53,6 +53,15 @@ class MjlabSingleEnvWrapper(gym.Env):
 		motion_path = cfg.get("motion_path", None)
 		assert motion_path is not None, \
 			"cfg.motion_path is required for mjlab tasks (path to retargeted .npz)"
+		# Resolve relative motion_path from the repo root, not Hydra's cwd —
+		# the launcher cd's into agents/tdmpc2/tdmpc2/ before invoking train.py,
+		# so a path like "data/..." would otherwise be looked up there.
+		if not os.path.isabs(motion_path):
+			repo_root = os.path.abspath(os.path.join(
+				os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
+			candidate = os.path.join(repo_root, motion_path)
+			if os.path.exists(candidate):
+				motion_path = candidate
 		motion_cmd.motion_file = motion_path
 		motion_cmd.sampling_mode = "uniform"
 
