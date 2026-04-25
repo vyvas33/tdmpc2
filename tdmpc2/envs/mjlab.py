@@ -38,12 +38,14 @@ class MjlabSingleEnvWrapper(gym.Env):
 		from rl.sac_env_wrapper import EmpiricalNormalization
 
 		task_id = cfg.task[len(_TASK_PREFIX):]
-		# warp/mjlab require an explicit index ("cuda:0"), not the bare "cuda"
-		# alias that torch accepts.
-		raw_device = str(cfg.get("device", "cuda:0"))
-		if raw_device == "cuda":
-			raw_device = "cuda:0"
-		device = torch.device(raw_device)
+		# warp/mjlab compare device against string keys ("cuda:0") and reject the
+		# bare "cuda" alias *and* torch.device objects (whose repr happens to be
+		# "cuda:0" but whose type is wrong). Pass mjlab a string; keep a
+		# torch.device for our own tensor ops.
+		device_str = str(cfg.get("device", "cuda:0"))
+		if device_str == "cuda":
+			device_str = "cuda:0"
+		device = torch.device(device_str)
 
 		env_cfg = load_env_cfg(task_id)
 
@@ -69,7 +71,7 @@ class MjlabSingleEnvWrapper(gym.Env):
 		env_cfg.auto_reset = False
 		env_cfg.seed = int(cfg.get("seed", 0))
 
-		self._env = ManagerBasedRlEnv(cfg=env_cfg, device=device)
+		self._env = ManagerBasedRlEnv(cfg=env_cfg, device=device_str)
 		self._device = device
 
 		self._actor_obs_dim = self._env.single_observation_space.spaces["actor"].shape[0]
